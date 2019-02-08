@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH -A C3SE2019-1-3 -p hebbe
-#SBATCH -n 10
+#SBATCH -n 1
 #SBATCH -t 0-01:00:00
 
-echo "Running slurm job"
-echo $SLURM_JOB_ID
+echo "Running batch job on data point: $SLURM_ARRAY_TASK_ID"

@@ -21,16 +21,35 @@ from qiskit_chemistry.aqua_extensions.components.initial_states import HartreeFo
 
 
 # Setting the atomic distance between atoms from command line argument
-if len(sys.argv) < 3:
-    print("ERROR: No bond length given!")
-    exit()
-if float(sys.argv[1]):
-    atomic_distance = float(sys.argv[1])
-else:
-    print("ERROR: Incorrect input argument!")
-    exit()
+atomic_distance = None
+backend_string = 'qasm_simulator'
+data_file = None
+for argument in sys.argv:
+    if '--distance=' in argument or '-d=' in argument:
+        atomic_distance = float(argument.split('=')[1])
 
-data_file = sys.argv[2]
+    elif '--backend=' in argument or '-b=' in argument:
+        given_string = argument.split('=')[1]
+        if given_string in ['qasm', 'qasm_simulator']:
+            backend_string = 'qasm_simulator'
+        elif given_string in ['statevector', 'statevector_simulator']: 
+            backend_string = 'statevector_simulator'
+        elif given_string in ['unitary', 'unitary_simulator']:
+            backend_string = 'unitary_simulator'
+        else:
+            print('WARNING: Incorrect backend given!')
+            print('Available backends are: ')
+            print('\tqasm_simulator')
+            print('\tstatevector_simulator')
+            print('\tunitary_simulator')
+            print('Continuing with default backend: {}'.format(backend_string))
+
+    elif '--output-file=' in argument or '-o=' in argument:
+        data_file = argument.split('=',1)
+
+if not atomic_distance:
+    print('ERROR: No distance given! Exiting...')
+    quit()
 
 # using driver to get fermionic Hamiltonian
 # PySCF example
@@ -81,20 +100,13 @@ qubitOp = ferOp.mapping(map_type=map_type, threshold=0.00000001)
 qubitOp = qubitOp.two_qubit_reduced_operator(num_particles) if qubit_reduction else qubitOp
 qubitOp.chop(10**-10)
 
-print(qubitOp.print_operators())
-print(qubitOp)
-
 # Using exact eigensolver to get the smallest eigenvalue
 exact_eigensolver = ExactEigensolver(qubitOp, k=1)
 ret = exact_eigensolver.run()
 #print('The computed energy is: {:.12f}'.format(ret['eigvals'][0].real))
 #print('The total ground state energy is: {:.12f}'.format(ret['eigvals'][0].real + energy_shift + nuclear_repulsion_energy))
 
-print(qubitOp.print_operators())
-print(qubitOp)
-
-
-backend = Aer.get_backend('statevector_simulator')
+backend = Aer.get_backend(backend_string)
 
 # setup COBYLA optimizer
 max_eval = 100
@@ -115,19 +127,16 @@ var_form = UCCSD(qubitOp.num_qubits, depth=1,
 vqe = VQE(qubitOp, var_form, cobyla, 'matrix')
 quantum_instance = QuantumInstance(backend=backend)
 
+print('Running simulation...')
+
 results = vqe.run(quantum_instance)
 #print('The computed ground state energy is: {:.12f}'.format(results['eigvals'][0]))
 #print('The total ground state energy is: {:.12f}'.format(results['eigvals'][0] + energy_shift + nuclear_repulsion_energy))
 #print("Parameters: {}".format(results['opt_params']))
 
-with open(data_file,'a') as outfile:
-    outfile.write('%f,%f,%f\n' % (atomic_distance, results['eigvals'][0], results['eigvals'][0] + energy_shift + nuclear_repulsion_energy))
 
-quantum_circuit = QuantumCircuit(QuantumRegister(qubitOp.num_qubits, name='q'))
-circuits = qubitOp.construct_evaluation_circuit('paulis', quantum_circuit, backend)
-
-for c in circuits:
-    print(c)
-    
-print(quantum_instance)
-quit()
+if data_file:
+    with open(data_file,'a') as outfile:
+        outfile.write('%f,%f,%f\n' % (atomic_distance, results['eigvals'][0], results['eigvals'][0] + energy_shift + nuclear_repulsion_energy))
+else: 
+    print('%f,%f,%f\n' % (atomic_distance, results['eigvals'][0], results['eigvals'][0] + energy_shift + nuclear_repulsion_energy))

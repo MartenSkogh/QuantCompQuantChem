@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 #SBATCH -A C3SE2019-1-3 -p hebbe
-#SBATCH -n 1
+#SBATCH -n 10
 #SBATCH -t 0-01:00:00
+#SBATCH --mail-user=marten.skogh@student.chalmers.se --mail-type=end
 
-echo "Running batch job on data point: $SLURM_ARRAY_TASK_ID"
+module load intel/2018b
+module load Python/3.7.0
+
+python3 ground_state_energy.py -d=1.5 -b=qasm, -o=$TMPDIR/results.txt
+cp $TMPDIR/results.txt ~/Results

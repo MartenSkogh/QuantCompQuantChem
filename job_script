@@ -7,5 +7,8 @@
 module load intel/2018b
 module load Python/3.7.0
 
+LOCALPYTHONLIB=~skoghm/.local/lib/python3.7/site-packages/
+PATH=$PATH:LOCALPYTHONLIB
+
 python3 ground_state_energy.py -d=1.5 -b=qasm, -o=$TMPDIR/results.txt
 cp $TMPDIR/results.txt ~/Results

@@ -1,0 +1,38 @@
+Bootstrap: docker
+From: centos
+
+%files
+    ./test_qiskit.py
+
+%post
+    mkdir -p /c3se
+    mkdir -p /local
+    mkdir -p /apps
+    mkdir -p /usr/share/lmod/lmod
+    mkdir -p /var/hasplm
+    mkdir -p /var/opt/thinlinc
+    mkdir -p /usr/lib64
+    touch /usr/lib64/libdlfaker.so
+    touch /usr/lib64/libvglfaker.so
+    touch /usr/bin/nvidia-smi
+
+    yum update -y
+    yum install -y epel-release
+
+    #yum install -y centos-release-scl
+    #yum-config-manager --enable rhel-server-rhscl-7-rpms
+    #yum install -y devtoolset-7
+    #scl enable devtoolset-7 bash
+
+    yum install -y openssl-devel bzip2-devel libffi libffi-devel
+    yum install -y gmp-devel mpfr-devel libmpc-devel libseccomp
+    yum install -y libxml2-devel gcc-c++
+    yum install -y python36 python36-pip python36-devel 
+    #yum install -y rsync git make cmake3 openblas-devel unzip wget
+    
+    pip3.6 install --upgrade pip
+    pip3.6 install pyscf
+    pip3.6 install qiskit qiskit-aer qiskit-aqua qiskit-terra qiskit-chemistry
+    
+    # Run test to see if setup succeeded
+    python3.6 ./test_qiskit.py -d=1.5 -b=statevector 

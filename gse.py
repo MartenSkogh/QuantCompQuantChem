@@ -340,7 +340,7 @@ if __name__ == '__main__':
     result_dir = "./Results"#os.environ['RESULT_DIR']
     #nbr_tasks = int(os.environ['SLURM_ARRAY_TASK_COUNT'])
     #task_id = int(os.environ['SLURM_ARRAY_TASK_ID'])
-    job_id = randint(1,2**16)#int(os.environ['SLURM_ARRAY_JOB_ID'])
+    job_id = ''#int(os.environ['SLURM_ARRAY_JOB_ID'])
     #file_identifier = os.environ['FILE_ID']
 
     molecules = ["H2", "LiH", "BeH2", "H2O"] #, "HCN"]
@@ -433,7 +433,7 @@ if __name__ == '__main__':
 
                     result_filename = (f"{result_dir}"
                                        f"{experiment_dir}/"
-                                       f"{job_id}.csv")
+                                       f"results{job_id}.csv")
 
                     result_file = open(result_filename, 'a')
                     print(f"Writing to '{result_filename}'")

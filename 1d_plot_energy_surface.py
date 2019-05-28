@@ -13,11 +13,11 @@ rc('text', usetex=True)
 plt.rcParams['lines.markersize'] = 10
 
 
-molecules = ['H2']
+molecules = ['LiH']
 var_methods = ['UCCSD', 'RY', 'RYRZ', 'SwapRZ']
 var_depths = ['2']#[1,2,3,4,5]
 
-csv_name = '/36143.csv'
+csv_name = '/result.csv'
 paths = [item for item in itertools.product(*[molecules, var_methods, var_depths])]
 
 stringfy = lambda arr: [str(element) for element in arr]
